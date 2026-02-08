@@ -38,7 +38,7 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 transition-colors">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black transition-colors">
       <div className="absolute top-4 right-4">
         <button
           onClick={() => {
@@ -60,7 +60,7 @@ function Login() {
       </div>
 
       <div className="max-w-md w-full mx-4 animate-scale-in">
-        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl p-8 border border-slate-200 dark:border-slate-800">
+        <div className="bg-white dark:dark:bg-neutral-900 rounded-2xl shadow-2xl p-8 border border-gray-200 dark:border-neutral-800">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-black text-amber-600 mb-2">NexBank</h1>
             <p className="text-slate-600 dark:text-slate-400">Welcome back</p>
@@ -83,7 +83,7 @@ function Login() {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-900 dark:text-slate-100 transition"
+                className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-black dark:text-white transition"
                 placeholder="you@example.com"
               />
             </div>
@@ -98,7 +98,7 @@ function Login() {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-900 dark:text-slate-100 transition"
+                className="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-black dark:text-white transition"
                 placeholder="••••••••"
               />
             </div>

@@ -1,9 +1,9 @@
 const pool = require('../config/database');
 
 const transferMoney = async (req, res) => {
-  const { fromAccountId, toAccountId, amount, description } = req.body;
+  const { fromAccountId, toAccountId, toAccountNumber, amount, description } = req.body;
 
-  if (!fromAccountId || !toAccountId || !amount || amount <= 0) {
+  if (!fromAccountId || (!toAccountId && !toAccountNumber) || !amount || amount <= 0) {
     return res.status(400).json({ error: 'Invalid transfer details' });
   }
 
@@ -32,10 +32,18 @@ const transferMoney = async (req, res) => {
       return res.status(400).json({ error: 'Insufficient funds' });
     }
 
-    const toAccount = await client.query(
-      'SELECT * FROM accounts WHERE id = $1 FOR UPDATE',
-      [toAccountId]
-    );
+    let toAccount;
+    if (toAccountId) {
+      toAccount = await client.query(
+        'SELECT * FROM accounts WHERE id = $1 FOR UPDATE',
+        [toAccountId]
+      );
+    } else if (toAccountNumber) {
+      toAccount = await client.query(
+        'SELECT * FROM accounts WHERE account_number = $1 FOR UPDATE',
+        [toAccountNumber]
+      );
+    }
 
     if (toAccount.rows.length === 0) {
       await client.query('ROLLBACK');
@@ -47,6 +55,8 @@ const transferMoney = async (req, res) => {
       return res.status(400).json({ error: 'Destination account is not active' });
     }
 
+    const finalToAccountId = toAccount.rows[0].id;
+
     await client.query(
       'UPDATE accounts SET balance = balance - $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
       [amount, fromAccountId]
@@ -54,12 +64,12 @@ const transferMoney = async (req, res) => {
 
     await client.query(
       'UPDATE accounts SET balance = balance + $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
-      [amount, toAccountId]
+      [amount, finalToAccountId]
     );
 
     const transaction = await client.query(
       'INSERT INTO transactions (from_account_id, to_account_id, amount, transaction_type, description, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-      [fromAccountId, toAccountId, amount, 'transfer', description || 'Transfer', 'completed']
+      [fromAccountId, finalToAccountId, amount, 'transfer', description || 'Transfer', 'completed']
     );
 
     await client.query('COMMIT');

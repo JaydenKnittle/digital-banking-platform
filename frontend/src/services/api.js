@@ -25,16 +25,44 @@ api.interceptors.request.use(
 export const authAPI = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
+  getProfile: () => api.get('/auth/profile'),
+  updateProfile: (data) => api.put('/auth/profile', data),
+  changePassword: (data) => api.put('/auth/change-password', data),
 };
 
 export const accountAPI = {
   getAccounts: () => api.get('/accounts'),
   getAccountById: (accountId) => api.get(`/accounts/${accountId}`),
+  verifyAccount: (account_number) => api.post('/accounts/verify', { account_number }),
 };
 
 export const transactionAPI = {
   transfer: (data) => api.post('/transactions/transfer', data),
   getTransactions: (accountId) => api.get(`/transactions/${accountId}`),
+};
+
+export const beneficiaryAPI = {
+  getBeneficiaries: () => api.get('/beneficiaries'),
+  addBeneficiary: (data) => api.post('/beneficiaries', data),
+  updateBeneficiary: (beneficiaryId, data) => api.put(`/beneficiaries/${beneficiaryId}`, data),
+  deleteBeneficiary: (beneficiaryId) => api.delete(`/beneficiaries/${beneficiaryId}`),
+};
+
+export const statementAPI = {
+  downloadStatement: (accountId) => {
+    const token = localStorage.getItem('token');
+    return axios.get(`${API_URL}/statements/${accountId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      responseType: 'blob',
+    });
+  },
+};
+
+export const depositWithdrawalAPI = {
+  deposit: (data) => api.post('/operations/deposit', data),
+  withdraw: (data) => api.post('/operations/withdraw', data),
 };
 
 export default api;

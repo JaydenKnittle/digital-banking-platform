@@ -3,9 +3,13 @@ const cors = require('cors');
 require('dotenv').config();
 
 const createTables = require('./src/config/createTables');
+const addBeneficiariesTable = require('./src/config/addBeneficiariesTable');
 const authRoutes = require('./src/routes/authRoutes');
 const accountRoutes = require('./src/routes/accountRoutes');
 const transactionRoutes = require('./src/routes/transactionRoutes');
+const beneficiaryRoutes = require('./src/routes/beneficiaryRoutes');
+const statementRoutes = require('./src/routes/statementRoutes');
+const depositWithdrawalRoutes = require('./src/routes/depositWithdrawalRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -16,6 +20,9 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/accounts', accountRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/beneficiaries', beneficiaryRoutes);
+app.use('/api/statements', statementRoutes);
+app.use('/api/operations', depositWithdrawalRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'Digital Banking Platform API' });
@@ -24,6 +31,7 @@ app.get('/', (req, res) => {
 const startServer = async () => {
   try {
     await createTables();
+    await addBeneficiariesTable();
     console.log('Database tables initialized');
 
     app.listen(PORT, () => {
