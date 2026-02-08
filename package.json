@@ -1,0 +1,17 @@
+{
+  "name": "digital-banking-platform",
+  "version": "1.0.0",
+  "description": "Full-featured digital banking platform with account management, transfers, and transaction tracking. Built with React, Node.js, and PostgreSQL.",
+  "main": "index.js",
+  "scripts": {
+  "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+  "backend": "npm run dev --prefix backend",
+  "frontend": "npm run dev --prefix frontend"
+},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
