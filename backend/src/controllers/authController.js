@@ -90,7 +90,7 @@ const login = async (req, res) => {
     res.json({
       message: 'Login successful',
       token,
-      user: userWithoutPassword,
+      user: userWithoutPassword, // This now includes the 'role' field
     });
   } catch (error) {
     console.error('Login error:', error);

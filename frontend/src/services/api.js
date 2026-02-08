@@ -73,4 +73,15 @@ export const standingOrderAPI = {
   executeStandingOrders: () => api.post('/standing-orders/execute'),
 };
 
+export const adminAPI = {
+  getStats: () => api.get('/admin/stats'),
+  getAllUsers: () => api.get('/admin/users'),
+  getAllAccounts: () => api.get('/admin/accounts'),
+  getAllTransactions: () => api.get('/admin/transactions'),
+  getAllStandingOrders: () => api.get('/admin/standing-orders'),
+  freezeAccount: (accountId) => api.put(`/admin/accounts/${accountId}/freeze`),
+  unfreezeAccount: (accountId) => api.put(`/admin/accounts/${accountId}/unfreeze`),
+  createAccountForUser: (data) => api.post('/admin/accounts/create', data),
+};
+
 export default api;
