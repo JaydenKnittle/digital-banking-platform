@@ -5,6 +5,7 @@ require('dotenv').config();
 const createTables = require('./src/config/createTables');
 const addBeneficiariesTable = require('./src/config/addBeneficiariesTable');
 const addStandingOrdersTable = require('./src/config/addStandingOrdersTable');
+const updateTransactionTypes = require('./src/config/updateTransactionTypes');
 const authRoutes = require('./src/routes/authRoutes');
 const accountRoutes = require('./src/routes/accountRoutes');
 const transactionRoutes = require('./src/routes/transactionRoutes');
@@ -12,6 +13,7 @@ const beneficiaryRoutes = require('./src/routes/beneficiaryRoutes');
 const statementRoutes = require('./src/routes/statementRoutes');
 const depositWithdrawalRoutes = require('./src/routes/depositWithdrawalRoutes');
 const standingOrderRoutes = require('./src/routes/standingOrderRoutes');
+const { startCronJobs } = require('./src/services/cronJobs');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -36,7 +38,11 @@ const startServer = async () => {
     await createTables();
     await addBeneficiariesTable();
     await addStandingOrdersTable();
+    await updateTransactionTypes(); // Add this line
     console.log('Database tables initialized');
+
+    // Start cron jobs
+    startCronJobs();
 
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);

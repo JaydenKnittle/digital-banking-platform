@@ -12,6 +12,8 @@ function StandingOrders() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingOrder, setEditingOrder] = useState(null);
   const [formData, setFormData] = useState({
     fromAccountId: '',
     toAccountNumber: '',
@@ -19,6 +21,12 @@ function StandingOrders() {
     amount: '',
     frequency: 'monthly',
     startDate: new Date().toISOString().split('T')[0],
+    endDate: '',
+    description: '',
+  });
+  const [editFormData, setEditFormData] = useState({
+    amount: '',
+    frequency: '',
     endDate: '',
     description: '',
   });
@@ -55,6 +63,13 @@ function StandingOrders() {
     });
   };
 
+  const handleEditChange = (e) => {
+    setEditFormData({
+      ...editFormData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -78,6 +93,33 @@ function StandingOrders() {
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to create standing order');
     }
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    try {
+      await standingOrderAPI.updateStandingOrder(editingOrder.id, editFormData);
+      setSuccess('Standing order updated successfully!');
+      setShowEditModal(false);
+      setEditingOrder(null);
+      fetchStandingOrders();
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to update standing order');
+    }
+  };
+
+  const handleEdit = (order) => {
+    setEditingOrder(order);
+    setEditFormData({
+      amount: order.amount,
+      frequency: order.frequency,
+      endDate: order.end_date ? order.end_date.split('T')[0] : '',
+      description: order.description || '',
+    });
+    setShowEditModal(true);
   };
 
   const handleCancel = async (standingOrderId) => {
@@ -178,7 +220,7 @@ function StandingOrders() {
           </button>
         </div>
 
-        {error && !showCreateModal && (
+        {error && !showCreateModal && !showEditModal && (
           <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 text-red-700 dark:text-red-300 px-6 py-4 rounded-lg mb-8 animate-fade-in">
             {error}
           </div>
@@ -239,6 +281,14 @@ function StandingOrders() {
                         </span>
                         <span>•</span>
                         <span className="font-semibold">{getFrequencyDisplay(order.frequency)}</span>
+                        {order.end_date && (
+                          <>
+                            <span>•</span>
+                            <span className="font-semibold">
+                              Until: {new Date(order.end_date).toLocaleDateString()}
+                            </span>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -255,6 +305,12 @@ function StandingOrders() {
 
                 {order.status === 'active' || order.status === 'paused' ? (
                   <div className="flex gap-2 pt-4 border-t border-gray-200 dark:border-neutral-800">
+                    <button
+                      onClick={() => handleEdit(order)}
+                      className="flex-1 px-4 py-2 bg-blue-100 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 font-bold rounded-lg hover:bg-blue-200 dark:hover:bg-blue-950/50 transition"
+                    >
+                      Edit
+                    </button>
                     {order.status === 'active' ? (
                       <button
                         onClick={() => handlePause(order.id)}
@@ -369,7 +425,6 @@ function StandingOrders() {
                   name="toAccountNumber"
                   value={formData.toAccountNumber}
                   onChange={(e) => {
-                    // Only allow numbers
                     const value = e.target.value.replace(/\D/g, '');
                     setFormData({ ...formData, toAccountNumber: value });
                   }}
@@ -462,9 +517,13 @@ function StandingOrders() {
                     min={formData.startDate || new Date().toISOString().split('T')[0]}
                     className="w-full px-4 py-3 bg-gray-50 dark:bg-black border-2 border-gray-200 dark:border-neutral-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-black dark:text-white transition"
                   />
-                  {formData.endDate && (
+                  {formData.endDate ? (
                     <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
                       Last payment on {new Date(formData.endDate).toLocaleDateString()}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                      Leave blank for indefinite payments
                     </p>
                   )}
                 </div>
@@ -488,7 +547,6 @@ function StandingOrders() {
                 </p>
               </div>
 
-              {/* Summary Box */}
               {formData.fromAccountId && formData.amount && formData.recipientName && (
                 <div className="bg-blue-50 dark:bg-blue-950/20 border-2 border-blue-200 dark:border-blue-800 rounded-xl p-4 animate-fade-in">
                   <h4 className="font-black text-black dark:text-white mb-3 flex items-center gap-2">
@@ -555,6 +613,160 @@ function StandingOrders() {
                   className="flex-1 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold px-6 py-3 rounded-xl hover:from-amber-600 hover:to-amber-700 transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Create Standing Order
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {showEditModal && editingOrder && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in overflow-y-auto">
+          <div className="bg-white dark:bg-neutral-900 rounded-3xl shadow-2xl max-w-2xl w-full p-8 border border-gray-200 dark:border-neutral-800 animate-scale-in my-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-3xl font-black text-black dark:text-white">Edit Standing Order</h2>
+              <button
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditingOrder(null);
+                  setError('');
+                }}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-neutral-800 rounded-lg transition"
+              >
+                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="bg-gray-50 dark:bg-neutral-800 rounded-xl p-4 mb-6">
+              <h4 className="font-bold text-black dark:text-white mb-3">Payment Details (Cannot be changed)</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Recipient:</span>
+                  <span className="text-black dark:text-white font-semibold">{editingOrder.recipient_name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Account Number:</span>
+                  <span className="text-black dark:text-white font-mono font-semibold">{editingOrder.to_account_number}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Start Date:</span>
+                  <span className="text-black dark:text-white font-semibold">
+                    {new Date(editingOrder.start_date).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {error && (
+              <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg mb-6">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleEditSubmit} className="space-y-5">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold text-black dark:text-white mb-2">
+                    Amount (N$) <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <span className="text-gray-500 dark:text-gray-400 text-lg font-bold">N$</span>
+                    </div>
+                    <input
+                      type="number"
+                      name="amount"
+                      value={editFormData.amount}
+                      onChange={handleEditChange}
+                      required
+                      step="0.01"
+                      min="1.00"
+                      max="1000000"
+                      className="w-full pl-16 pr-4 py-3 bg-gray-50 dark:bg-black border-2 border-gray-200 dark:border-neutral-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-black dark:text-white transition text-lg font-semibold"
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-black dark:text-white mb-2">
+                    Frequency <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="frequency"
+                    value={editFormData.frequency}
+                    onChange={handleEditChange}
+                    required
+                    className="w-full px-4 py-3 bg-gray-50 dark:bg-black border-2 border-gray-200 dark:border-neutral-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-black dark:text-white transition font-semibold"
+                  >
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-black dark:text-white mb-2">
+                  End Date <span className="text-gray-500">(Optional)</span>
+                </label>
+                <input
+                  type="date"
+                  name="endDate"
+                  value={editFormData.endDate}
+                  onChange={handleEditChange}
+                  min={new Date(editingOrder.start_date).toISOString().split('T')[0]}
+                  className="w-full px-4 py-3 bg-gray-50 dark:bg-black border-2 border-gray-200 dark:border-neutral-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-black dark:text-white transition"
+                />
+                {editFormData.endDate ? (
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                    Last payment on {new Date(editFormData.endDate).toLocaleDateString()}
+                  </p>
+                ) : (
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                    Leave blank for indefinite payments
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-black dark:text-white mb-2">
+                  Description <span className="text-gray-500">(Optional)</span>
+                </label>
+                <textarea
+                  name="description"
+                  value={editFormData.description}
+                  onChange={handleEditChange}
+                  rows="3"
+                  maxLength={200}
+                  className="w-full px-4 py-3 bg-gray-50 dark:bg-black border-2 border-gray-200 dark:border-neutral-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-black dark:text-white transition resize-none"
+                  placeholder="e.g., Monthly rent payment"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-500 mt-1 text-right">
+                  {editFormData.description.length}/200 characters
+                </p>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setEditingOrder(null);
+                    setError('');
+                  }}
+                  className="flex-1 px-6 py-3 border-2 border-gray-300 dark:border-neutral-700 text-black dark:text-white font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-neutral-800 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold px-6 py-3 rounded-xl hover:from-amber-600 hover:to-amber-700 transition shadow-lg"
+                >
+                  Save Changes
                 </button>
               </div>
             </form>
