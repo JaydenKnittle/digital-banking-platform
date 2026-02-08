@@ -65,4 +65,12 @@ export const depositWithdrawalAPI = {
   withdraw: (data) => api.post('/operations/withdraw', data),
 };
 
+export const standingOrderAPI = {
+  getStandingOrders: () => api.get('/standing-orders'),
+  createStandingOrder: (data) => api.post('/standing-orders', data),
+  updateStandingOrder: (standingOrderId, data) => api.put(`/standing-orders/${standingOrderId}`, data),
+  cancelStandingOrder: (standingOrderId) => api.delete(`/standing-orders/${standingOrderId}`),
+  executeStandingOrders: () => api.post('/standing-orders/execute'),
+};
+
 export default api;

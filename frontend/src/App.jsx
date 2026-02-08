@@ -6,6 +6,7 @@ import DepositWithdraw from './pages/DepositWithdraw';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
 import Register from './pages/Register';
+import StandingOrders from './pages/StandingOrders';
 import Transfer from './pages/Transfer';
 
 function App() {
@@ -69,6 +70,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <DepositWithdraw />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/standing-orders"
+            element={
+              <ProtectedRoute>
+                <StandingOrders />
               </ProtectedRoute>
             }
           />
