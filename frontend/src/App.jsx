@@ -1,18 +1,20 @@
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import AccountDetails from './pages/AccountDetails';
-import Beneficiaries from './pages/Beneficiaries';
-import Dashboard from './pages/Dashboard';
-import DepositWithdraw from './pages/DepositWithdraw';
-import Login from './pages/Login';
-import Profile from './pages/Profile';
-import Register from './pages/Register';
-import StandingOrders from './pages/StandingOrders';
-import Transfer from './pages/Transfer';
 import AdminAccounts from './pages/admin/AdminAccounts';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminStandingOrders from './pages/admin/AdminStandingOrders';
 import AdminTransactions from './pages/admin/AdminTransactions';
 import AdminUsers from './pages/admin/AdminUsers';
+import Beneficiaries from './pages/Beneficiaries';
+import Dashboard from './pages/Dashboard';
+import DepositWithdraw from './pages/DepositWithdraw';
+import Login from './pages/Login';
+import MerchantPortal from './pages/MerchantPortal';
+import Profile from './pages/Profile';
+import Register from './pages/Register';
+import StandingOrders from './pages/StandingOrders';
+import Transfer from './pages/Transfer';
+import VirtualCards from './pages/VirtualCards';
 
 function App() {
   const isAuthenticated = () => {
@@ -45,6 +47,7 @@ function App() {
           <Route path="/" element={<Navigate to="/dashboard" />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/merchant" element={<MerchantPortal />} />
           <Route
             path="/dashboard"
             element={
@@ -101,6 +104,15 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route
+  path="/virtual-cards"
+  element={
+    <ProtectedRoute>
+      <VirtualCards />
+    </ProtectedRoute>
+  }
+/>
           
           {/* Admin Routes */}
           <Route

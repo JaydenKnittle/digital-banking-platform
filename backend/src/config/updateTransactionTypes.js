@@ -8,11 +8,11 @@ const updateTransactionTypes = async () => {
       DROP CONSTRAINT IF EXISTS transactions_transaction_type_check;
     `);
 
-    // Add new constraint with 'standing_order' included
+    // Add new constraint with 'card_payment' included
     await pool.query(`
       ALTER TABLE transactions 
       ADD CONSTRAINT transactions_transaction_type_check 
-      CHECK (transaction_type IN ('transfer', 'deposit', 'withdrawal', 'standing_order'));
+      CHECK (transaction_type IN ('transfer', 'deposit', 'withdrawal', 'standing_order', 'card_payment'));
     `);
 
     console.log('✅ Transaction types updated successfully');

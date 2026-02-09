@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:5000/api`;
 
 const api = axios.create({
   baseURL: API_URL,
@@ -82,6 +82,15 @@ export const adminAPI = {
   freezeAccount: (accountId) => api.put(`/admin/accounts/${accountId}/freeze`),
   unfreezeAccount: (accountId) => api.put(`/admin/accounts/${accountId}/unfreeze`),
   createAccountForUser: (data) => api.post('/admin/accounts/create', data),
+};
+
+export const virtualCardAPI = {
+  getVirtualCards: () => api.get('/virtual-cards'),
+  createVirtualCard: (data) => api.post('/virtual-cards', data),
+  updateVirtualCard: (cardId, data) => api.put(`/virtual-cards/${cardId}`, data),
+  deleteVirtualCard: (cardId) => api.delete(`/virtual-cards/${cardId}`),
+  generateQRToken: (cardId) => api.post(`/virtual-cards/${cardId}/generate-qr`),
+  processPayment: (data) => axios.post(`${API_URL}/virtual-cards/process-payment`, data),
 };
 
 export default api;

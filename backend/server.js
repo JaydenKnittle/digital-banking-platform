@@ -6,7 +6,9 @@ const createTables = require('./src/config/createTables');
 const addBeneficiariesTable = require('./src/config/addBeneficiariesTable');
 const addStandingOrdersTable = require('./src/config/addStandingOrdersTable');
 const updateTransactionTypes = require('./src/config/updateTransactionTypes');
+const updateAccountStatus = require('./src/config/updateAccountStatus');
 const addUserRole = require('./src/config/addUserRole');
+const addVirtualCardsTable = require('./src/config/addVirtualCardsTable');
 const authRoutes = require('./src/routes/authRoutes');
 const accountRoutes = require('./src/routes/accountRoutes');
 const transactionRoutes = require('./src/routes/transactionRoutes');
@@ -15,8 +17,8 @@ const statementRoutes = require('./src/routes/statementRoutes');
 const depositWithdrawalRoutes = require('./src/routes/depositWithdrawalRoutes');
 const standingOrderRoutes = require('./src/routes/standingOrderRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
+const virtualCardRoutes = require('./src/routes/virtualCardRoutes');
 const { startCronJobs } = require('./src/services/cronJobs');
-const updateAccountStatus = require('./src/config/updateAccountStatus');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -32,6 +34,7 @@ app.use('/api/statements', statementRoutes);
 app.use('/api/operations', depositWithdrawalRoutes);
 app.use('/api/standing-orders', standingOrderRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/virtual-cards', virtualCardRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'Digital Banking Platform API' });
@@ -43,8 +46,9 @@ const startServer = async () => {
     await addBeneficiariesTable();
     await addStandingOrdersTable();
     await updateTransactionTypes();
-    await addUserRole();
     await updateAccountStatus();
+    await addUserRole();
+    await addVirtualCardsTable();
     console.log('Database tables initialized');
 
     // Start cron jobs
